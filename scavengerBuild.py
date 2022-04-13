@@ -4,13 +4,14 @@
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 import os.path
 from os import path
-from random import choice, randint
+from random import choice, randint, randrange
 
 wordFilename = "wordList.txt"
+studentFilename = "roster.tab"
 treeDepth = 4
 treeBreadth = 8
 numberOfScavengerNotes = 5
-studentList = [("arana", 32586142386)]
+# [("arana", 32586142386)]
 
 class Node(object):
     def __init__(self, data):
@@ -34,6 +35,29 @@ class Node(object):
         if len(self.nodeList):
             for node in self.nodeList:
                 node.printTree(prefix + '\t')
+
+
+class NumberGenerator(object):
+    def __init__(self, numberDigits):
+        self.usedNumberList = []
+        self.startOfNumbers = 10 ** numberDigits
+        self.endOfNumbers = (10 ** (numberDigits + 1)) - 1
+
+    def __next__(self):
+        new = randrange(self.startOfNumbers, self.endOfNumbers)
+        while new in self.usedNumberList:
+            new = randrange(self.startOfNumbers, self.endOfNumbers)
+        self.usedNumberList.append(new)
+        return new
+
+def getStudents(filename):
+    namesList = []
+    with open(filename, 'r') as namesFile:
+        header = namesFile.readline()
+        for line in namesFile.readlines():
+            firstName, lastName = line.strip().split('\t')
+            namesList.append((firstName, lastName))
+    return namesList
 
 
 def generateWordList(filename):
@@ -111,12 +135,17 @@ def buildScavengerNotes(rootPath, pathList, prizevalue):
 
 if __name__ == '__main__':
     wordList = generateWordList(wordFilename)
+    studentNames = getStudents(studentFilename)
+    accountNames = [f"{first}{last[0]}" for first, last in studentNames]
+    numberSource = NumberGenerator(10)
+    answerCodes = [ numberSource.__next__() for name in accountNames]
+    studentAnswers = dict(zip(accountNames, answerCodes))
     treeRoot = Node(choice(wordList))
     buildTree(treeRoot, treeDepth, treeBreadth, wordList)
     treeRoot.printTree('')
     chosenNodes = chooseNodes(numberOfScavengerNotes, treeDepth, treeBreadth, treeRoot)
     directoryPathList = buildPathList(chosenNodes)
-    for studentName, prize in studentList:
+    for studentName, prize in studentAnswers.items():
         userHomeDir = os.path.expanduser('~' + studentName)
         buildDirectories(userHomeDir, treeRoot)
         buildScavengerNotes(path.join(userHomeDir, treeRoot.getNodeData()), directoryPathList, prize)
