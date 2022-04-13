@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERDIR=/home/septri/nixScavengerHunt/users
+USERDIR=/home/$USER/nixScavengerHunt/users
 
 if [[ ! -d $USERDIR ]];
 then
@@ -16,9 +16,9 @@ while read -r line; do
     sudo adduser -q --disabled-password $LOWERCASE
     echo "y"
     sudo mkdir /home/$LOWERCASE/.ssh
-    sudo chown septri /home/$LOWERCASE/.ssh
-    ssh-keygen -b 2048 -t rsa -f "/home/septri/nixScavengerHunt/users/$LOWERCASE.pem" -N "" -m PEM
-    mv /home/septri/nixScavengerHunt/users/$LOWERCASE.pem.pub /home/$LOWERCASE/.ssh/authorized_keys
+    sudo chown $USER /home/$LOWERCASE/.ssh
+    ssh-keygen -b 2048 -t rsa -f "$USERDIR/$LOWERCASE.pem" -N "" -m PEM
+    mv $USERDIR/$LOWERCASE.pem.pub /home/$LOWERCASE/.ssh/authorized_keys
     sudo chown -R $LOWERCASE /home/$LOWERCASE/.ssh
 done <$STUDENTS
 
